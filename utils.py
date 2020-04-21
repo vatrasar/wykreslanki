@@ -100,10 +100,17 @@ def convert_images_to_letters(img_letters:List[List[np.ndarray]])->List[List[Let
     for r_index,row in enumerate(img_letters):
         table.append([])
         for letter_img in row:
-            letter_character=pytesseract.image_to_string(letter_img, config="--psm 10")
+            letter_character:str=pytesseract.image_to_string(letter_img, config="--psm 10")[0]
+            letter_character=letter_character.lower()
 
             table[r_index].append(Letter(letter_img,letter_character))
 
     return table
 
 
+def mark_letter(letter:Letter):
+    image=letter.img_letter
+    np.apply_along_axis(mark,2,image)
+def mark(x:np.ndarray):
+    x[2]-=100
+    x[1] -= 100

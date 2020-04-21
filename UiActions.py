@@ -22,6 +22,12 @@ class UiActions():
         item = QtGui.QStandardItem(new_item)
 
         self.modelListView.appendRow(item)
+
+        result=self.look_for_word(new_item)
+        if len(result)!=0:
+            for letter in result:
+                utils.mark_letter(letter)
+            self.update_image()
     def delete_item(self,index):
         self.modelListView.removeRow(index.row())
 
@@ -44,4 +50,47 @@ class UiActions():
         image2.save("temp.png")
         pixmap = QPixmap("temp.png")
         self.window.resultView.setPixmap(pixmap)
-        
+
+    def look_for_word(self,word:str):
+        for r_index,row in enumerate(self.grid_of_letters):
+            for c_index, letter in enumerate(row):
+                if word[0]==letter.character:
+                   result=self.check_letter(word,r_index,c_index)
+                   if len(result)!=0:
+                        return result
+        return []
+
+    def check_letter(self, word, r_index, c_index)->list:
+        # letters=[]
+        #
+        # letters.append(self.grid_of_letters[r_index][c_index])
+
+        test_list=[(1,1),(-1,1),(-1,-1),(1,-1),(0,1),(1,0),(0,-1),(-1,0)]
+        for test in test_list:
+            result=self.check_direction(word,r_index,c_index,test[0],test[1])
+            if len(result)!=0:
+                result.append(self.grid_of_letters[r_index][c_index])
+                return result
+        return []
+
+
+
+
+
+
+    def check_direction(self,word,r_index, c_index,r_progres,c_progres):
+
+        letters=[]
+        r=r_index
+        c=c_index
+        index=1
+        while True:
+           r+=r_progres
+           c+=c_progres
+           if self.grid_of_letters[r][c].character==word[index]:
+               letters.append(self.grid_of_letters[r][c])
+               index+=1
+               if index== len(word):
+                   return letters
+           else:
+               return []
