@@ -105,3 +105,5 @@ def convert_images_to_letters(img_letters:List[List[np.ndarray]])->List[List[Let
             table[r_index].append(Letter(letter_img,letter_character))
 
     return table
+
+
