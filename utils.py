@@ -1,15 +1,63 @@
-from typing import List
+from typing import List,Tuple
 import numpy as np
 from PIL import Image
-from numpy import asarray
+from numpy import array
 from numpy import ndarray
 
-def split_grid_of_letters_image_for_letters(image)->list:
+
+def get_rows(image_bin:ndarray,image_rgb:ndarray)->Tuple[List[np.ndarray],List[np.ndarray]]:
+    rows_bin=[]
+    rows_rgb=[]
+    start=0
+    end=0
+    looking_for_row_end=False
+    for i in range(0,int(image_bin.shape[0])):
+        if looking_for_row_end and image_bin[i].all():
+            end=i
+            rows_bin.append(image_rgb[start:(end+1)])
+            rows_rgb.append(image_bin[start:(end+1)])
+            looking_for_row_end=False
+        elif not(looking_for_row_end) and not(image_bin[i].all()):
+            start=i
+            looking_for_row_end=True
+    return (rows_bin,rows_rgb)
+
+
+def split_rows_to_letters(rows_bin:List[np.ndarray], rows_rgb:List[np.ndarray])->List[List[np.ndarray]]:
+    letters_grid=[]
+    for index,row in enumerate(rows_bin):
+       row_letters_list=split_row_for_letters_img(row,rows_rgb[index])
+       letters_grid.append(row_letters_list)
+    return letters_grid
+
+
+def split_row_for_letters_img(rows_bin:np.ndarray, rows_rgb:np.ndarray):
+
+    letters = []
+    start = 0
+    end = 0
+    looking_for_letter_end = False
+    for i in range(0, int(rows_bin.shape[1])):
+        if looking_for_letter_end and rows_bin[:,i].all():
+            end=i
+            letters.append(rows_rgb[:,start:(end+1)])
+
+            looking_for_letter_end=False
+        elif not(looking_for_letter_end) and not(rows_bin[:,i].all()):
+            start=i
+            looking_for_letter_end=True
+    return letters
+
+
+def split_grid_of_letters_image_to_letters(image_bin:ndarray,image_rgb:ndarray)->list:
     """
-    split one image of grid of latters for collection of images of letters
+    split one image of grid of letters to collection of images of letters
 :return list of numpy arrays which includes images of latters
     """
-    pass
+    rows_bin,rows_rgb=get_rows(image_bin,image_rgb)
+    letters_img_np=split_rows_to_letters(rows_bin,rows_rgb)
+    print(letters_img_np)
+
 
 
 
@@ -22,7 +70,7 @@ def load_image_as_np_array(image_name:str, is_rgb)->ndarray:
     image = Image.open(image_name)
     if not(is_rgb):
         image=image.convert('1')
-    image_np=asarray(image)
+    image_np=array(image)
 
     return image_np
 
