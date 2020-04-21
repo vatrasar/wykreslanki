@@ -3,7 +3,10 @@ import numpy as np
 from PIL import Image
 from numpy import array
 from numpy import ndarray
+import pytesseract
+from Letter import Letter
 
+TOLERANCE=3
 
 def get_rows(image_bin:ndarray,image_rgb:ndarray)->Tuple[List[np.ndarray],List[np.ndarray]]:
     rows_bin=[]
@@ -14,8 +17,8 @@ def get_rows(image_bin:ndarray,image_rgb:ndarray)->Tuple[List[np.ndarray],List[n
     for i in range(0,int(image_bin.shape[0])):
         if looking_for_row_end and image_bin[i].all():
             end=i
-            rows_bin.append(image_rgb[start:(end+1)])
-            rows_rgb.append(image_bin[start:(end+1)])
+            rows_bin.append(image_rgb[start-TOLERANCE:(end+1+TOLERANCE)])
+            rows_rgb.append(image_bin[start-TOLERANCE:(end+1+TOLERANCE)])
             looking_for_row_end=False
         elif not(looking_for_row_end) and not(image_bin[i].all()):
             start=i
@@ -40,7 +43,7 @@ def split_row_for_letters_img(rows_bin:np.ndarray, rows_rgb:np.ndarray):
     for i in range(0, int(rows_bin.shape[1])):
         if looking_for_letter_end and rows_bin[:,i].all():
             end=i
-            letters.append(rows_rgb[:,start:(end+1)])
+            letters.append(rows_rgb[:,start-TOLERANCE:(end+1+TOLERANCE)])
 
             looking_for_letter_end=False
         elif not(looking_for_letter_end) and not(rows_bin[:,i].all()):
@@ -49,17 +52,30 @@ def split_row_for_letters_img(rows_bin:np.ndarray, rows_rgb:np.ndarray):
     return letters
 
 
-def split_grid_of_letters_image_to_letters(image_bin:ndarray,image_rgb:ndarray)->list:
+def split_image_to_images_of_letters(image_bin:ndarray,image_rgb:ndarray)->list:
     """
     split one image of grid of letters to collection of images of letters
 :return list of numpy arrays which includes images of latters
     """
-    rows_bin,rows_rgb=get_rows(image_bin,image_rgb)
+    rows_rgb,rows_bin,=get_rows(image_bin,image_rgb)
     letters_img_np=split_rows_to_letters(rows_bin,rows_rgb)
-    print(letters_img_np)
+    return letters_img_np
+
+def to_binary(x:np.ndarray,mean):
+
+    if(x.mean()>=mean):
+        return True
+    else:
+        return False
 
 
-
+def convert_to_binar(image_np):
+    fun=np.vectorize(to_binary)
+    result=np.apply_along_axis(to_binary, 2, image_np, min(image_np.mean(),210))
+    r=image_np[:,:,0]
+    g=image_np[:,:,1]
+    b=image_np[:,:,2]
+    return result
 
 def load_image_as_np_array(image_name:str, is_rgb)->ndarray:
     """
@@ -68,10 +84,24 @@ def load_image_as_np_array(image_name:str, is_rgb)->ndarray:
     :return: returns image as numpy array
     """
     image = Image.open(image_name)
+    image_np = array(image)
     if not(is_rgb):
-        image=image.convert('1')
-    image_np=array(image)
+        image_np=convert_to_binar(image_np)
+        # image=image.convert('1')
+    # image_np=array(image)
 
     return image_np
 
 
+
+
+def convert_images_to_letters(img_letters:List[List[np.ndarray]])->List[List[Letter]]:
+    table=[]
+    for r_index,row in enumerate(img_letters):
+        table.append([])
+        for letter_img in row:
+            letter_character=pytesseract.image_to_string(letter_img, config="--psm 10")
+
+            table[r_index].append(Letter(letter_img,letter_character))
+
+    return table
