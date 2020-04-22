@@ -20,7 +20,7 @@ def get_rows(image_bin:ndarray,image_rgb:ndarray)->Tuple[List[np.ndarray],List[n
             rows_bin.append(image_rgb[start-TOLERANCE:(end+1+TOLERANCE)])
             rows_rgb.append(image_bin[start-TOLERANCE:(end+1+TOLERANCE)])
             looking_for_row_end=False
-        elif not(looking_for_row_end) and not(image_bin[i].all()):
+        elif not(looking_for_row_end) and not(image_bin[i].all()) and (i+1!=int(image_bin.shape[0]) and not(image_bin[i+1].all())):
             start=i
             looking_for_row_end=True
     return (rows_bin,rows_rgb)
@@ -112,5 +112,5 @@ def mark_letter(letter:Letter):
     image=letter.img_letter
     np.apply_along_axis(mark,2,image)
 def mark(x:np.ndarray):
-    x[2]-=100
-    x[1] -= 100
+    x[0]-=100
+    x[2] -= 100

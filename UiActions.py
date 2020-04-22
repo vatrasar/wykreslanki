@@ -87,6 +87,8 @@ class UiActions():
         while True:
            r+=r_progres
            c+=c_progres
+           if r>= len(self.grid_of_letters) or c>= len(self.grid_of_letters[r]) or c<0 or r<0:
+               return []
            if self.grid_of_letters[r][c].character==word[index]:
                letters.append(self.grid_of_letters[r][c])
                index+=1
