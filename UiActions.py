@@ -18,6 +18,8 @@ class UiActions():
 
     def on_add_word(self):
         new_item=self.window.txtWord.text()
+        if len(new_item)==0:
+            return
         self.window.txtWord.setText("")
         item = QtGui.QStandardItem(new_item)
 

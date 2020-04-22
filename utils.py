@@ -26,30 +26,40 @@ def get_rows(image_bin:ndarray,image_rgb:ndarray)->Tuple[List[np.ndarray],List[n
     return (rows_bin,rows_rgb)
 
 
-def split_rows_to_letters(rows_bin:List[np.ndarray], rows_rgb:List[np.ndarray])->List[List[np.ndarray]]:
+def split_rows_to_letters(rows_bin: List[np.ndarray], rows_rgb: List[np.ndarray], cordinates) ->List[List[np.ndarray]]:
     letters_grid=[]
     for index,row in enumerate(rows_bin):
-       row_letters_list=split_row_for_letters_img(row,rows_rgb[index])
+       row_letters_list=split_row_for_letters_img(cordinates,rows_rgb[index])
        letters_grid.append(row_letters_list)
     return letters_grid
 
 
-def split_row_for_letters_img(rows_bin:np.ndarray, rows_rgb:np.ndarray):
+def split_row_for_letters_img(cordinates:List[Tuple[int,int]], rows_rgb:np.ndarray):
 
     letters = []
     start = 0
     end = 0
     looking_for_letter_end = False
-    for i in range(0, int(rows_bin.shape[1])):
-        if looking_for_letter_end and rows_bin[:,i].all():
-            end=i
-            letters.append(rows_rgb[:,start-TOLERANCE:(end+1+TOLERANCE)])
-
-            looking_for_letter_end=False
-        elif not(looking_for_letter_end) and not(rows_bin[:,i].all()):
-            start=i
-            looking_for_letter_end=True
+    for letter_cordinates in cordinates:
+        letters.append(rows_rgb[:,letter_cordinates[0]:letter_cordinates[1]])
     return letters
+
+
+def get_columns_cordintaes(image_bin:np.ndarray)->List[Tuple[int,int]]:
+    columns_cordinates = []
+    start = 0
+    end = 0
+    looking_for_letter_end = False
+    for i in range(0, int(image_bin.shape[1])):
+        if looking_for_letter_end and image_bin[:, i].all():
+            end = i
+            columns_cordinates.append((start - TOLERANCE,end + 1 + TOLERANCE))
+
+            looking_for_letter_end = False
+        elif not (looking_for_letter_end) and not (image_bin[:, i].all()):
+            start = i
+            looking_for_letter_end = True
+    return columns_cordinates
 
 
 def split_image_to_images_of_letters(image_bin:ndarray,image_rgb:ndarray)->list:
@@ -58,7 +68,8 @@ def split_image_to_images_of_letters(image_bin:ndarray,image_rgb:ndarray)->list:
 :return list of numpy arrays which includes images of latters
     """
     rows_rgb,rows_bin,=get_rows(image_bin,image_rgb)
-    letters_img_np=split_rows_to_letters(rows_bin,rows_rgb)
+    columns_cordinates=get_columns_cordintaes(image_bin)
+    letters_img_np=split_rows_to_letters(rows_bin,rows_rgb,columns_cordinates)
     return letters_img_np
 
 def to_binary(x:np.ndarray,mean):
@@ -100,7 +111,11 @@ def convert_images_to_letters(img_letters:List[List[np.ndarray]])->List[List[Let
     for r_index,row in enumerate(img_letters):
         table.append([])
         for letter_img in row:
-            letter_character:str=pytesseract.image_to_string(letter_img, config="--psm 10")[0]
+            letter_character: str = " "
+            if letter_img.min()<=170:
+                letter_character:str=pytesseract.image_to_string(letter_img, config="--psm 10")[0]
+                if letter_character=="=":
+                    letter_character="e"
             letter_character=letter_character.lower()
 
             table[r_index].append(Letter(letter_img,letter_character))
