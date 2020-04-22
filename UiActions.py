@@ -1,10 +1,11 @@
-from PyQt5.QtGui import QPixmap
+from PyQt5.QtGui import QPixmap, QColor
 
 from MainWindow import Ui_MainWindow
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QFileDialog
 import utils
 from PIL import Image
+import numpy as np
 
 class UiActions():
     def __init__(self,window:Ui_MainWindow) -> None:
@@ -15,23 +16,46 @@ class UiActions():
         self.window.wordListView.setModel(self.modelListView)
         self.window.wordListView.doubleClicked.connect(self.delete_item)
         self.window.btnLoadImage.clicked.connect(self.set_image)
+        self.window.loadWordsList.clicked.connect(self.on_load_words_list)
+        self.item_image_list=[]
+    def on_load_words_list(self):
+        options = QFileDialog.Options()
+        options |= QFileDialog.DontUseNativeDialog
+
+        fileName, _ = QFileDialog.getOpenFileName(None, "QFileDialog.getOpenFileName()", "",
+                                                  "All Files (*.png);;Obrazki (*.png);;jpg (*.jpg)", options=options)
+        if fileName:
+            image_np_rgb = utils.load_image_as_np_array(fileName, True)
+            image_np_bin = utils.load_image_as_np_array(fileName, False)
+            words = utils.split_image_to_images_of_words(image_np_bin, image_np_rgb)
+            for word in words:
+                self.add_new_word(word)
+            self.update_image()
+
 
     def on_add_word(self):
         new_item=self.window.txtWord.text()
         if len(new_item)==0:
             return
         self.window.txtWord.setText("")
-        item = QtGui.QStandardItem(new_item)
+        self.add_new_word(new_item)
+        self.update_image()
 
+    def add_new_word(self, word_to_add):
+        item = QtGui.QStandardItem(word_to_add)
         self.modelListView.appendRow(item)
-
-        result=self.look_for_word(new_item)
-        if len(result)!=0:
+        result = self.look_for_word(word_to_add)
+        if len(result) != 0:
+            self.item_image_list.append(result)
             for letter in result:
                 utils.mark_letter(letter)
-            self.update_image()
+        else:
+            item.setBackground(QColor(200, 0, 0))
+
     def delete_item(self,index):
         self.modelListView.removeRow(index.row())
+        self.un_mark_word(self.item_image_list[index.row()])
+        self.update_image()
 
     def set_image(self):
         options = QFileDialog.Options()
@@ -89,12 +113,27 @@ class UiActions():
         while True:
            r+=r_progres
            c+=c_progres
-           if r>= len(self.grid_of_letters) or c>= len(self.grid_of_letters[r]) or c<0 or r<0:
-               return []
-           if self.grid_of_letters[r][c].character==word[index]:
-               letters.append(self.grid_of_letters[r][c])
-               index+=1
-               if index== len(word):
-                   return letters
-           else:
-               return []
+           try:
+               if r>= len(self.grid_of_letters) or c>= len(self.grid_of_letters[r]) or c<0 or r<0:
+                   return []
+               if self.grid_of_letters[r][c].character==word[index]:
+
+                   letters.append(self.grid_of_letters[r][c])
+                   index+=1
+                   if index== len(word):
+                       return letters
+
+               else:
+                   return []
+           except IndexError:
+               print("cos")
+
+
+    def un_mark_word(self, letters):
+        for letter in letters:
+            image = letter.img_letter
+            np.apply_along_axis(self.un_mark, 2, image)
+    def un_mark(self,x: np.ndarray):
+        x[0] += 100
+        x[2] += 100
+

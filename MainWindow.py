@@ -36,7 +36,7 @@ class Ui_MainWindow(object):
         sizePolicy.setVerticalStretch(2)
         sizePolicy.setHeightForWidth(self.btnLoadImage.sizePolicy().hasHeightForWidth())
         self.btnLoadImage.setSizePolicy(sizePolicy)
-        self.btnLoadImage.setMinimumSize(QtCore.QSize(30, 10))
+        self.btnLoadImage.setMinimumSize(QtCore.QSize(30, 50))
         self.btnLoadImage.setMouseTracking(False)
         self.btnLoadImage.setAutoFillBackground(False)
         self.btnLoadImage.setObjectName("btnLoadImage")
@@ -88,6 +88,9 @@ class Ui_MainWindow(object):
         self.wordListView.setMinimumSize(QtCore.QSize(0, 50))
         self.wordListView.setObjectName("wordListView")
         self.verticalLayout_2.addWidget(self.wordListView)
+        self.loadWordsList = QtWidgets.QPushButton(self.dockWidgetContents_3)
+        self.loadWordsList.setObjectName("loadWordsList")
+        self.verticalLayout_2.addWidget(self.loadWordsList)
         self.dockWidget_2.setWidget(self.dockWidgetContents_3)
         MainWindow.addDockWidget(QtCore.Qt.DockWidgetArea(1), self.dockWidget_2)
 
@@ -99,3 +102,4 @@ class Ui_MainWindow(object):
         MainWindow.setWindowTitle(_translate("MainWindow", "Wykreślak"))
         self.btnLoadImage.setText(_translate("MainWindow", "Wczytaj zdjęcie"))
         self.btnAddWord.setText(_translate("MainWindow", "Dodaj słowo"))
+        self.loadWordsList.setText(_translate("MainWindow", "Wczytaj liste słów"))

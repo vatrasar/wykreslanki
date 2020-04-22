@@ -129,3 +129,10 @@ def mark_letter(letter:Letter):
 def mark(x:np.ndarray):
     x[0]-=100
     x[2] -= 100
+
+
+def split_image_to_images_of_words(image_np_bin:np.ndarray, image_np_rgb:np.ndarray):
+   result=pytesseract.image_to_string(image_np_rgb,config="--psm 4")
+   result=result.split("\n")
+   result=list(filter(lambda x:len(x)!=0, result))
+   return result
