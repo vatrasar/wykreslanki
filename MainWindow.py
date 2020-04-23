@@ -40,6 +40,7 @@ class Ui_MainWindow(object):
         self.verticalLayout_5.setObjectName("verticalLayout_5")
         self.resultView = QtWidgets.QLabel(self.result_widget)
         self.resultView.setText("")
+        self.resultView.setScaledContents(True)
         self.resultView.setObjectName("resultView")
         self.verticalLayout_5.addWidget(self.resultView)
         self.verticalLayout_4.addWidget(self.result_widget)

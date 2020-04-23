@@ -6,6 +6,8 @@ from PyQt5.QtWidgets import QFileDialog, QLabel, QProgressBar, QSizePolicy
 import utils
 from PIL import Image
 import numpy as np
+import threading
+import concurrent.futures
 
 class UiActions():
     def __init__(self,window:Ui_MainWindow) -> None:
@@ -77,11 +79,22 @@ class UiActions():
             self.image_np_rgb = utils.load_image_as_np_array(fileName, True)
             image_np_bin = utils.load_image_as_np_array(fileName, False)
             img_letters = utils.split_image_to_images_of_letters(image_np_bin, self.image_np_rgb)
-
             self.set_progress_bar()
-            self.grid_of_letters = utils.convert_images_to_letters(img_letters)
-            self.update_image()
 
+            thread = threading.Thread(target=self.get_letters_and_update_image, args=[img_letters])
+            thread.start()
+
+
+
+    def get_letters_and_update_image(self,img_letters):
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            executor= executor.submit(utils.convert_images_to_letters, img_letters)
+            self.grid_of_letters  = executor.result()
+
+        self.progressBar.setParent(None)
+        # self.window.result_widget.layout().addWidget(self.window.resultView)
+        self.window.verticalLayout_5.addWidget(self.window.resultView)
+        self.update_image()
 
     def update_image(self):
 
