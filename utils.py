@@ -75,6 +75,7 @@ def split_image_to_images_of_letters(image_bin:ndarray,image_rgb:ndarray)->list:
 
 def to_binary(x:np.ndarray,mean):
 
+
     if(x.mean()>=mean):
         return True
     else:
@@ -83,7 +84,7 @@ def to_binary(x:np.ndarray,mean):
 
 def convert_to_binar(image_np):
     fun=np.vectorize(to_binary)
-    result=np.apply_along_axis(to_binary, 2, image_np, min(image_np.mean(),210))
+    result=np.apply_along_axis(to_binary, 2, image_np, min(image_np.mean(),170))
     r=image_np[:,:,0]
     g=image_np[:,:,1]
     b=image_np[:,:,2]
@@ -107,10 +108,11 @@ def load_image_as_np_array(image_name:str, is_rgb)->ndarray:
 
 
 
-def convert_images_to_letters(img_letters:List[List[np.ndarray]])->List[List[Letter]]:
+def convert_images_to_letters(img_letters:List[List[np.ndarray]],signal)->List[List[Letter]]:
 
 
     table=[]
+    rows_number=len(img_letters)
     for r_index,row in enumerate(img_letters):
         table.append([])
 
@@ -123,7 +125,9 @@ def convert_images_to_letters(img_letters:List[List[np.ndarray]])->List[List[Let
             letter_character=letter_character.lower()
 
             table[r_index].append(Letter(letter_img,letter_character))
+        signal.emit(100*((r_index+1)/rows_number))
 
+    return table
 
 
 

@@ -3,13 +3,18 @@ from PyQt5.QtGui import QPixmap, QColor
 from MainWindow import Ui_MainWindow
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QFileDialog, QLabel, QProgressBar, QSizePolicy
+from PyQt5.QtCore import pyqtSignal
 import utils
 from PIL import Image
 import numpy as np
 import threading
 import concurrent.futures
 
+from TextRecgnitionThread import TextRecognitionThread
+
+
 class UiActions():
+
     def __init__(self,window:Ui_MainWindow) -> None:
         super().__init__()
         window.btnAddWord.clicked.connect(self.on_add_word)
@@ -26,6 +31,8 @@ class UiActions():
         self.progressBar.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Fixed)
         self.progressBar.setMinimumHeight(60)
         self.progressBar.setStyleSheet("#progressBar{\nheight:red;\n}")
+        self.disable_btns()
+        self.window.btnLoadImage.setDisabled(False)
 
 
     def on_load_words_list(self):
@@ -72,30 +79,48 @@ class UiActions():
         options |= QFileDialog.DontUseNativeDialog
 
         fileName, _ =QFileDialog.getOpenFileName(None, "QFileDialog.getOpenFileName()","", "All Files (*.png);;Obrazki (*.png);;jpg (*.jpg)",options=options)
-        if fileName:
 
+        if fileName:
+            self.set_progress_bar()
+            self.disable_btns()
             self.window.resultView.setParent(None)
 
             self.image_np_rgb = utils.load_image_as_np_array(fileName, True)
             image_np_bin = utils.load_image_as_np_array(fileName, False)
             img_letters = utils.split_image_to_images_of_letters(image_np_bin, self.image_np_rgb)
-            self.set_progress_bar()
+
 
             thread = threading.Thread(target=self.get_letters_and_update_image, args=[img_letters])
             thread.start()
 
+    def disable_btns(self):
 
+        self.window.btnLoadImage.setDisabled(True)
+        self.window.btnAddWord.setDisabled(True)
+        self.window.loadWordsList.setDisabled(True)
+    def enable_btns(self):
+        self.window.btnLoadImage.setDisabled(False)
+        self.window.btnAddWord.setDisabled(False)
+        self.window.loadWordsList.setDisabled(False)
+    def update_letters_grid(self,table):
+        self.grid_of_letters=table
+        self.enable_btns()
 
     def get_letters_and_update_image(self,img_letters):
-        with concurrent.futures.ThreadPoolExecutor() as executor:
-            executor= executor.submit(utils.convert_images_to_letters, img_letters)
-            self.grid_of_letters  = executor.result()
 
+
+
+
+        textThread=TextRecognitionThread(img_letters,self.update_progress_bar,self.update_letters_grid)
+        textThread.run()
+        textThread.wait()
         self.progressBar.setParent(None)
-        # self.window.result_widget.layout().addWidget(self.window.resultView)
+
         self.window.verticalLayout_5.addWidget(self.window.resultView)
         self.update_image()
 
+    def update_progress_bar(self,value):
+        self.progressBar.setValue(value)
     def update_image(self):
 
         image2 = Image.fromarray(self.image_np_rgb)
@@ -166,5 +191,7 @@ class UiActions():
     def set_progress_bar(self):
         self.window.result_widget.layout().setContentsMargins(50, 1, 50, 1)
         self.window.result_widget.layout().addWidget(self.progressBar)
+
+
 
 
