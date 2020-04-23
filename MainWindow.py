@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'MainWindow.ui'
+# Form implementation generated from reading ui file 'MainWindow2.ui'
 #
 # Created by: PyQt5 UI code generator 5.14.0
 #
@@ -13,23 +13,36 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(802, 521)
+        MainWindow.resize(719, 569)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setLayoutDirection(QtCore.Qt.LeftToRight)
         self.centralwidget.setAutoFillBackground(False)
+        self.centralwidget.setStyleSheet("#centralwidget{\n"
+"margin:20%;\n"
+"}")
         self.centralwidget.setObjectName("centralwidget")
         self.verticalLayout = QtWidgets.QVBoxLayout(self.centralwidget)
+        self.verticalLayout.setSpacing(6)
         self.verticalLayout.setObjectName("verticalLayout")
-        self.resultView = QtWidgets.QLabel(self.centralwidget)
+        self.verticalLayout_4 = QtWidgets.QVBoxLayout()
+        self.verticalLayout_4.setObjectName("verticalLayout_4")
+        self.result_widget = QtWidgets.QWidget(self.centralwidget)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
-        sizePolicy.setHorizontalStretch(2)
+        sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(15)
-        sizePolicy.setHeightForWidth(self.resultView.sizePolicy().hasHeightForWidth())
-        self.resultView.setSizePolicy(sizePolicy)
+        sizePolicy.setHeightForWidth(self.result_widget.sizePolicy().hasHeightForWidth())
+        self.result_widget.setSizePolicy(sizePolicy)
+        self.result_widget.setMinimumSize(QtCore.QSize(0, 500))
+        self.result_widget.setObjectName("result_widget")
+        self.verticalLayout_5 = QtWidgets.QVBoxLayout(self.result_widget)
+        self.verticalLayout_5.setSizeConstraint(QtWidgets.QLayout.SetDefaultConstraint)
+        self.verticalLayout_5.setContentsMargins(1, 1, 1, 0)
+        self.verticalLayout_5.setObjectName("verticalLayout_5")
+        self.resultView = QtWidgets.QLabel(self.result_widget)
         self.resultView.setText("")
-        self.resultView.setScaledContents(True)
         self.resultView.setObjectName("resultView")
-        self.verticalLayout.addWidget(self.resultView)
+        self.verticalLayout_5.addWidget(self.resultView)
+        self.verticalLayout_4.addWidget(self.result_widget)
         self.btnLoadImage = QtWidgets.QPushButton(self.centralwidget)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
         sizePolicy.setHorizontalStretch(5)
@@ -40,7 +53,8 @@ class Ui_MainWindow(object):
         self.btnLoadImage.setMouseTracking(False)
         self.btnLoadImage.setAutoFillBackground(False)
         self.btnLoadImage.setObjectName("btnLoadImage")
-        self.verticalLayout.addWidget(self.btnLoadImage)
+        self.verticalLayout_4.addWidget(self.btnLoadImage)
+        self.verticalLayout.addLayout(self.verticalLayout_4)
         MainWindow.setCentralWidget(self.centralwidget)
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
         self.statusbar.setObjectName("statusbar")

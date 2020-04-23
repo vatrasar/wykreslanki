@@ -5,6 +5,7 @@ from numpy import array
 from numpy import ndarray
 import pytesseract
 from Letter import Letter
+import asyncio
 
 TOLERANCE=3
 
@@ -107,9 +108,12 @@ def load_image_as_np_array(image_name:str, is_rgb)->ndarray:
 
 
 def convert_images_to_letters(img_letters:List[List[np.ndarray]])->List[List[Letter]]:
+
+
     table=[]
     for r_index,row in enumerate(img_letters):
         table.append([])
+
         for letter_img in row:
             letter_character: str = " "
             if letter_img.min()<=170:

@@ -2,7 +2,7 @@ from PyQt5.QtGui import QPixmap, QColor
 
 from MainWindow import Ui_MainWindow
 from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtWidgets import QFileDialog
+from PyQt5.QtWidgets import QFileDialog, QLabel, QProgressBar, QSizePolicy
 import utils
 from PIL import Image
 import numpy as np
@@ -18,6 +18,14 @@ class UiActions():
         self.window.btnLoadImage.clicked.connect(self.set_image)
         self.window.loadWordsList.clicked.connect(self.on_load_words_list)
         self.item_image_list=[]
+        self.progressBar=QProgressBar()
+
+
+        self.progressBar.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Fixed)
+        self.progressBar.setMinimumHeight(60)
+        self.progressBar.setStyleSheet("#progressBar{\nheight:red;\n}")
+
+
     def on_load_words_list(self):
         options = QFileDialog.Options()
         options |= QFileDialog.DontUseNativeDialog
@@ -63,9 +71,14 @@ class UiActions():
 
         fileName, _ =QFileDialog.getOpenFileName(None, "QFileDialog.getOpenFileName()","", "All Files (*.png);;Obrazki (*.png);;jpg (*.jpg)",options=options)
         if fileName:
+
+            self.window.resultView.setParent(None)
+
             self.image_np_rgb = utils.load_image_as_np_array(fileName, True)
             image_np_bin = utils.load_image_as_np_array(fileName, False)
             img_letters = utils.split_image_to_images_of_letters(image_np_bin, self.image_np_rgb)
+
+            self.set_progress_bar()
             self.grid_of_letters = utils.convert_images_to_letters(img_letters)
             self.update_image()
 
@@ -136,4 +149,9 @@ class UiActions():
     def un_mark(self,x: np.ndarray):
         x[0] += 100
         x[2] += 100
+
+    def set_progress_bar(self):
+        self.window.result_widget.layout().setContentsMargins(50, 1, 50, 1)
+        self.window.result_widget.layout().addWidget(self.progressBar)
+
 
