@@ -119,9 +119,18 @@ def convert_images_to_letters(img_letters:List[List[np.ndarray]],signal)->List[L
         for letter_img in row:
             letter_character: str = " "
             if letter_img.min()<=170:
-                letter_character:str=pytesseract.image_to_string(letter_img, config="--psm 10")[0]
+                try:
+                    letter_character:str=pytesseract.image_to_string(letter_img, config="--psm 10")[0]
+                except IndexError:
+                    min = letter_img.min()
+                    gre = letter_img[:, :, 0]
+                    print(letter_character)
+                    letter_character="*"
                 if letter_character=="=":
                     letter_character="e"
+                if letter_character=="|":
+
+                    letter_character="i"
             letter_character=letter_character.lower()
 
             table[r_index].append(Letter(letter_img,letter_character))

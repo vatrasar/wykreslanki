@@ -68,10 +68,13 @@ class UiActions():
                 utils.mark_letter(letter)
         else:
             item.setBackground(QColor(200, 0, 0))
+            self.item_image_list.append([])
 
     def delete_item(self,index):
         self.modelListView.removeRow(index.row())
-        self.un_mark_word(self.item_image_list[index.row()])
+        if len(self.item_image_list[index.row()])!=0:
+            self.un_mark_word(self.item_image_list[index.row()])
+        self.item_image_list.remove(self.item_image_list[index.row()])
         self.update_image()
 
     def set_image(self):
@@ -167,7 +170,7 @@ class UiActions():
            try:
                if r>= len(self.grid_of_letters) or c>= len(self.grid_of_letters[r]) or c<0 or r<0:
                    return []
-               if self.grid_of_letters[r][c].character==word[index]:
+               if self.grid_of_letters[r][c].character==word[index] or self.grid_of_letters[r][c].character=="*":
 
                    letters.append(self.grid_of_letters[r][c])
                    index+=1
